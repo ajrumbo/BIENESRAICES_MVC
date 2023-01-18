@@ -2,6 +2,7 @@ import { check, validationResult } from "express-validator";
 import Usuario from "../models/Usuario.js";
 import { generarId } from "../helpers/token.js";
 import { emailRegistro } from "../helpers/emails.js";
+import { where } from "sequelize";
 
 const formularioLogin = (req, res) => {
         res.render('auth/login', {pagina: 'Iniciar Sesión'});
@@ -36,7 +37,7 @@ const registrar = async (req, res) => {
         });
     }
 
-    const existe = await Usuario.findOne({where: {email: req.body.email}});
+    const existe = await Usuario.findOne({where: {email}});
 
     if(existe){
         return res.render('auth/registro', {
@@ -68,12 +69,26 @@ const registrar = async (req, res) => {
         mensaje: 'Hemos enviado un email de confirmación. Por favor, revise la bandeja de entrada del correo enviado y siga las instrucciones para la activación del usuario'
     });
 
-    
+}
+
+const confirmar = async (req, res) => {
+    const {token} = req.params;
+
+    const usuario = await Usuario.findOne({where: {token}});
+
+    if(!usuario){
+        
+    }
+
+    Usuario.update({ token: '' }, { where: { id: usuario.id } });
+
+    res.json({usuario})
 }
 
 export {
     formularioLogin,
     formularioRegistro,
     formularioOlvidePassword,
-    registrar
+    registrar,
+    confirmar
 }
