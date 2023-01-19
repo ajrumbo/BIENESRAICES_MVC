@@ -1,12 +1,15 @@
 import { check, validationResult } from "express-validator";
 import bcrypt from "bcrypt";
 import Usuario from "../models/Usuario.js";
-import { generarId } from "../helpers/token.js";
+import { generarId, generarToken } from "../helpers/token.js";
 import { emailRegistro, emailRecuperacion } from "../helpers/emails.js";
 
 
 const formularioLogin = (req, res) => {
-        res.render('auth/login', {pagina: 'Iniciar Sesión'});
+        res.render('auth/login', {
+            pagina: 'Iniciar Sesión',
+            csrfToken: req.csrfToken()
+        });
 }
 
 const formularioRegistro = (req, res) => {
@@ -201,6 +204,58 @@ const nuevoPassword = async (req, res) => {
 
 }
 
+const login = async (req, res) => {
+    const {email,password} = req.body;
+
+    await check('email').isEmail().withMessage('El email es incorrecto').run(req);
+    await check('password').isLength({min: 6}).withMessage('La contraseña debe tener al menos 6 caracteres').run(req);
+
+    let resultado = validationResult(req);
+
+    if(!resultado.isEmpty()){
+        return res.render('auth/login', {
+            pagina: 'Iniciar Sesión',
+            errores: resultado.array(),
+            usuario: {
+                email
+            },
+            csrfToken: req.csrfToken()
+        });
+    }
+
+    const usuario = await Usuario.findOne({where: {email}});
+
+    if(!usuario || !usuario.confirmado){
+        return res.render('auth/login', {
+            pagina: 'Iniciar Sesión',
+            errores: [{msg: 'El usuario no existe o no ha activado su cuenta'}],
+            email,
+            csrfToken: req.csrfToken()
+        });
+    }
+
+    const claveCorrecta = await bcrypt.compare(password, usuario.password);
+    if(!claveCorrecta){
+        return res.render('auth/login', {
+            pagina: 'Iniciar Sesión',
+            errores: [{msg: 'La contraseña es incorrecta'}],
+            email,
+            csrfToken: req.csrfToken()
+        });
+    }
+
+    const token = generarToken(usuario.id);
+
+    console.log(token)
+
+    res.cookie('_token', token, {
+        httpOnly: true,
+        // secure: true,
+        // sameSite: true
+    }).redirect('/mis-propiedades');
+
+}
+
 export {
     formularioLogin,
     formularioRegistro,
@@ -209,5 +264,6 @@ export {
     confirmar,
     olvidePassword,
     comprobarToken,
-    nuevoPassword
+    nuevoPassword,
+    login
 }

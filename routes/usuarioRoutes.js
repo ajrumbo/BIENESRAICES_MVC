@@ -5,6 +5,7 @@ import {
     formularioLogin,
     formularioOlvidePassword,
     formularioRegistro,
+    login,
     nuevoPassword,
     olvidePassword,
     registrar
@@ -12,15 +13,13 @@ import {
 
 const router = Router();
 
-router.get('/login', formularioLogin);
+router.route('/login').get(formularioLogin).post(login);
 
-router.get('/registro', formularioRegistro);
-router.post('/registro', registrar);
+router.route('/registro').get(formularioRegistro).post(registrar);
 
 router.get('/confirmar/:token', confirmar);
 
-router.get('/olvide-password', formularioOlvidePassword);
-router.post('/olvide-password', olvidePassword);
+router.route('/olvide-password').get(formularioOlvidePassword).post(olvidePassword);
 
 router.route('/olvide-password/:token').get(comprobarToken).post(nuevoPassword);
 

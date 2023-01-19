@@ -3,6 +3,7 @@ import db from "./config/db.js";
 import csrf from "csurf";
 import cookieParser from "cookie-parser";
 import usuarioRoutes from "./routes/usuarioRoutes.js";
+import propiedadesRoutes from "./routes/propiedadesRoutes.js";
 
 
 // conexión a la bd
@@ -27,6 +28,7 @@ app.use(csrf({ cookie: true }));
 
 
 app.use('/auth', usuarioRoutes);
+app.use('/', propiedadesRoutes);
 
 //Habilitar PUG 
 app.set('view engine', 'pug');
