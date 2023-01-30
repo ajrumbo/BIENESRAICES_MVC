@@ -7,7 +7,8 @@ import {
     editar, 
     eliminar, 
     guardar, 
-    guardarCambios 
+    guardarCambios, 
+    mostrarPropiedad
 } from "../controllers/propiedadController.js";
 import { body } from "express-validator";
 import auth from "../middleware/auth.js";
@@ -54,5 +55,8 @@ router.route('/propiedades/editar/:id').get(auth, editar).post(
 );
 
 router.post('/propiedades/eliminar/:id', auth, eliminar);
+
+//Área pública
+router.get('/propiedad/:id', mostrarPropiedad);
 
 export default router;

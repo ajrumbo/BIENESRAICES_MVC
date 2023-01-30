@@ -20,7 +20,7 @@ block contenido
                                     img(src=`uploads/${propiedad.imagen}` alt=`Imagen Propiedad ${propiedad.titulo}` class="w-full block")
 
                                 div(class="sm:w-2/4 md:w-3/6 lg:w-4/6 space-y-3") 
-                                    a(href="#" class="block text-2xl font-extrabold text-indigo-600 truncate")= propiedad.titulo
+                                    a(href=`/propiedad/${propiedad.id}` class="block text-2xl font-extrabold text-indigo-600 truncate")= propiedad.titulo
 
                                     p(class="text-sm text-black font-bold")= propiedad.categoria.nombre
 
@@ -39,6 +39,20 @@ block contenido
                                     form(action=`/propiedades/eliminar/${propiedad.id}` method="POST")
                                         input(type="hidden", name="_csrf" value=csrfToken)
                                         input(type="submit", value="Eliminar" class="px-2 py-2 md:py-1 font-semibold text-xs leading-5 rounded  cursor-pointer bg-red-100 text-red-800 w-full") 
+
+                div(class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6")
+
+                    div(class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between")
+                        p(class="text-sm text-gray-700 gap-2") Mostrando 
+                            span(class="font-medium") #{offset + 1} a 
+                            span(class="font-medium") #{total < limit + offset ? total : limit + offset} de 
+                            span(class="font-medium") #{total} resultados
+
+                    div(class="hidden sm:block")
+                        nav(class="relative z-0 inline-flex rounded-md shadow-md")
+                            - var n = 1;
+                                while n <= paginas 
+                                    a(href=`/mis-propiedades?pagina=${n}` class=`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${paginaActual == n ? 'bg-indigo-50 border-indigo-500 text-indigo-500' : 'bg-white border-gray-500 text-gray-500 hover:bg-gray-50' }`) #{n++} 
 
         else 
             p.text-center No hay propiedades 

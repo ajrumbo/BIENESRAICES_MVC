@@ -6,22 +6,51 @@ import { Categoria, Precio, Propiedad, Usuario } from "../models/index.js";
 
 const admin = async (req, res) => {
     const {id} = req.usuario;
+    const { pagina: paginaActual } = req.query; 
 
-    const propiedades = await Propiedad.findAll({
-        where: {
-            usuarioId: id
-        }, 
-        include: [
-            { model: Categoria },
-            { model: Precio }
-        ]
-    });
+    const regExp = /^[0-9]$/;
 
-    res.render('propiedades/admin', {
-        pagina: 'Mis Propiedades',
-        propiedades,
-        csrfToken: req.csrfToken()
-    });
+    if(!regExp.test(paginaActual)) return res.redirect('/mis-propiedades?pagina=1');
+
+    try {
+
+        const limit = 5;
+        const offset = ((paginaActual * limit) - limit);
+
+        const [propiedades, total] = await Promise.all([
+            Propiedad.findAll({
+                limit,
+                offset,
+                where: {
+                    usuarioId: id
+                }, 
+                include: [
+                    { model: Categoria },
+                    { model: Precio }
+                ]
+            }),
+            Propiedad.count({
+                where: {
+                    usuarioId: id
+                } 
+            })
+        ]);
+
+    
+        res.render('propiedades/admin', {
+            pagina: 'Mis Propiedades',
+            propiedades,
+            csrfToken: req.csrfToken(),
+            paginas: Math.ceil(total / limit),
+            paginaActual,
+            limit,
+            offset,
+            total
+        });
+    } catch (error) {
+        console.log(error);
+    }
+    
 }
 
 const crear = async (req, res) => {
@@ -221,6 +250,24 @@ const eliminar = async (req, res) => {
     return res.redirect('/mis-propiedades');
 }
 
+const mostrarPropiedad = async (req, res) => {
+    const { id } = req.params;
+
+    const propiedad = await Propiedad.findByPk(id, {
+        include: [
+            { model: Categoria },
+            { model: Precio }
+        ]
+    });
+
+    if(!propiedad) return res.redirect('/404');
+
+    res.render('propiedades/mostrar',{
+        propiedad,
+        pagina: propiedad.titulo
+    });
+}
+
 export {
     admin,
     crear,
@@ -229,5 +276,6 @@ export {
     almacenarImagen,
     editar,
     guardarCambios,
-    eliminar
+    eliminar,
+    mostrarPropiedad
 }
