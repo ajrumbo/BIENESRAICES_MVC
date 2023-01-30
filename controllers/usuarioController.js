@@ -246,8 +246,6 @@ const login = async (req, res) => {
 
     const token = generarToken(usuario.id);
 
-    console.log(token)
-
     res.cookie('_token', token, {
         httpOnly: true,
         // secure: true,
