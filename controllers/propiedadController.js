@@ -8,13 +8,13 @@ const admin = async (req, res) => {
     const {id} = req.usuario;
     const { pagina: paginaActual } = req.query; 
 
-    const regExp = /^[1-9]$/
+    const regExp = /^[1-9][0-9]*$/
 
     if(!regExp.test(paginaActual)) return res.redirect('/mis-propiedades?pagina=1');
 
     try {
 
-        const limit = 1;
+        const limit = 5;
         const offset = ((paginaActual * limit) - limit);
 
         const [propiedades, total] = await Promise.all([
